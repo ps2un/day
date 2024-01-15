@@ -1,10 +1,10 @@
-echo "# day" >> README.md
-In that...
-git add README.md
-git commit -m "first commit"
-Flags - Main
-git Remote Additional Origin https://github.com/ps2un/day.git
-Flag Push -u Origin Main
+//////////////////////////////////////////////////////////////////////
+//Notion settings
+const databaseID = `fd3397e329e846c2b20983673af84f92`;
+const token = `secret_gDgA9b76fRCb76g57uA3alnxUnILqEQtPgV51fOhKXf`;
+const notionVersion = '2022-02-22';
+const notionApi = `https://api.notion.com/v1/databases/${databaseID}`;
+
 //Notion column names
 const quoteCol = 'Quote';
 const createdDateCol = 'Created Date';
@@ -112,31 +112,31 @@ async function readNotionQuote() {
   let quotesObjs = convertNotionQuotes(resNotion);
 
 
-  (Objs.length == 0 if quoted)
-    Returns null.
+  if (quotesObjs.length == 0)
+    return null;
 
-  // Previous random number load
-  Set to fmCloud = File Manager.iCloud(); // iCloud
-  docFile = fmCloud.docsDocumentsDirectory() + '/LastElems를 인용합니다.txt';
-  lastUsedIndexs = [ ];
-  (fmCloud.fileExists(docFile)) {일 경우
-    leave it random text = fmCloud.readString(docFile);
-    Random Text = RandomTexts.trim();
-    number text = randomTexts.split('');
-    번호Texts. for Each(n = > last UsedIndexs.push(Number(n));
-    console.log('이전 난수: ' + last UsedIndexs);
+  //load previous random numbers
+  let fmCloud = FileManager.iCloud(); // iCloud
+  let docFile = fmCloud.documentsDirectory() + '/quoteLastElems.txt';
+  let lastUsedIndexes = [];
+  if (fmCloud.fileExists(docFile)) {
+    let randomTexts = fmCloud.readString(docFile);
+    randomTexts = randomTexts.trim();
+    let numberTexts = randomTexts.split(' ');
+    numberTexts.forEach(n => lastUsedIndexes.push(Number(n)));
+    console.log('Previous random numbers: ' + lastUsedIndexes);
   }
 
-  MaxRand = 0.
-  Objs for the angle (qo = > maxRand + = qo.rating). Quote;
+  let maxRand = 0;
+  quotesObjs.forEach(qo => maxRand += qo.rating);
   console.log('Max rand:' + maxRand);
 
-  //"Free" Random Number Search
-  Index = Math.floor(Math.random() * quotesObjs.length).
-  (lastUsedIndexs.length < quotesObjs.length) {
-    randomNumber = Math.floor(Math.random() * maxRand);
-    useIndex = convertRandomToQuoteIndex(난수, maxRand, quotesObjs);
-    (!lastUsedIndex.include. (useIndex) is included)
+  //find "free" random number
+  let useIndex = Math.floor(Math.random() * quotesObjs.length);
+  while (lastUsedIndexes.length < quotesObjs.length) {
+    let randomNumber = Math.floor(Math.random() * maxRand);
+    useIndex = convertRandomToQuoteIndex(randomNumber, maxRand, quotesObjs);
+    if (!lastUsedIndexes.includes(useIndex))
       break;
   }
 
@@ -148,56 +148,56 @@ async function readNotionQuote() {
   lastUsedIndexes.forEach(lui => lastUsedIndexesText += lui.toString() + ' ');
   fmCloud.writeString(docFile, lastUsedIndexesText);
 
-  console.log ('Use' + Use) Index + ':' + Quote Objs[useIndex]);
-  Quote Objs[useIndex];
+  console.log('Using ' + useIndex + ': ' + quotesObjs[useIndex]);
+  return quotesObjs[useIndex];
 }
 
-함수 변환RandomToQuoteIndex(randNum, maxRand, quotesObjs){ 
-  Use index = 0;.
-  Total current = 0;.
-  (randNum < maxRand) { 동안
-    (Index >= quotesObjs.length - 1 used)
-      Breaking;
-    CurrRating = quote Objs[useIndex].Rated;
-    (current total + currRating > randNum)인 경우
-      Breaking;
-    Use Index++;
-    Current total += curRating;
+function convertRandomToQuoteIndex(randNum, maxRand, quotesObjs){ 
+  let useIndex = 0;
+  let currentTotal = 0;
+  while (randNum < maxRand) {
+    if (useIndex >= quotesObjs.length - 1)
+      break;
+    let currRating = quotesObjs[useIndex].rating;
+    if (currentTotal + currRating > randNum)
+      break;
+    useIndex++;
+    currentTotal += currRating;
   }
 
-  return use Index;
+  return useIndex;
 }
 
-Function TransformationNotionQuotes (jsonNotion) {
-  quotateObjects = [];
+function convertNotionQuotes(jsonNotion) {
+  let quoteObjects = [];
 
-  jsonNotion.results.each (element = > {)
+  jsonNotion.results.forEach(element => {
     let newQuoteObj = {};
-    = Specify an element ['Property'].
-    Text = prop [quote color] ['rich_text'];
+    let props = element['properties'];
+    let text = props[quoteCol]['rich_text'];
 
-    If (text.length == 0)
-      Return;
+    if (text.length == 0)
+      return;
 
     newQuoteObj.text = text;
-    let createdDate= pople [createdDateCol]['created_time'];
-    newQuoteObj.date = newDate (date created);
-    New estimate Obj.rating = prop[ratingCol]['Select']['Name'] Length / 2;
-    newQuoteObj.url = element. url;
-    newQuoteObj.writer = extractPlainText(props[writerCol]['title']);
-    quoteObjects.push(새로운 quoteObj);
+    let createdDate = props[createdDateCol]['created_time'];
+    newQuoteObj.date = new Date(createdDate);
+    newQuoteObj.rating = props[ratingCol]['select']['name'].length / 2;
+    newQuoteObj.url = element.url;
+    newQuoteObj.author = extractPlainText(props[authorCol]['title']);
+    quoteObjects.push(newQuoteObj);
   });
 
-  objects.sort ((a, b) => (a.date > b.date) ? 1 : -1);
+  quoteObjects.sort((a, b) => (a.date > b.date) ? 1 : -1);
 
-  Return Quote Object;
+  return quoteObjects;
 }
 
-Extract function plane text (text){
-  If (texts.length == 0)
-    Return ";
+function extractPlainText(texts) {
+  if (texts.length == 0)
+    return "";
 
-  let final Text = "";
-  for each text (t = > final Text + = t. plane_text);
-  return final Text;
+  let finalText = "";
+  texts.forEach(t => finalText += t.plain_text);
+  return finalText;
 }
