@@ -1,0 +1,203 @@
+echo "# day" >> README.md
+In that...
+git add README.md
+git commit -m "first commit"
+Flags - Main
+git Remote Additional Origin https://github.com/ps2un/day.git
+Flag Push -u Origin Main
+//Notion column names
+const quoteCol = 'Quote';
+const createdDateCol = 'Created Date';
+const ratingCol = 'Rating';
+const authorCol = 'Author';
+
+//////////////////////////////////////////////////////////////////////
+//read random quote from Notion page
+let quote = await readNotionQuote();
+let text = extractPlainText(quote.text);
+let rating = quote.rating;
+let clickUrl = quote.url;
+
+console.log(text);
+
+let widget = await createWidget();
+
+// Check where the script is running
+if (config.runsInWidget) {
+  // Runs inside a widget so add it to the homescreen widget
+  Script.setWidget(widget);
+} else {
+  // Show the medium widget inside the app
+  widget.presentMedium();
+}
+Script.complete();
+
+//////////////////////////////////////////////////////////////////////
+async function createWidget() {
+  // Create new empty ListWidget instance
+  let listwidget = new ListWidget();
+
+  // Set new background color
+  listwidget.backgroundColor = new Color("#1C1C1E");
+  let nextRefresh = Date.now() + 1000 * 60 * 120; // add 2 hours
+  var nextDate = new Date(Date.now());
+  let hour = nextDate.getHours();
+  console.log('Hour: ' + hour);
+
+  //don't refresh during the night, next day is better
+  if (hour < 7 || 21 < hour) {
+    var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(8);
+    tomorrow.setMinutes(0);
+    tomorrow.setMilliseconds(0);
+    nextRefresh = tomorrow.getTime();
+    console.log('Next day refresh');
+  }
+
+  console.log('Next refresh: ' + new Date(nextRefresh));
+  listwidget.refreshAfterDate = new Date(nextRefresh);
+  listwidget.spacing = 6;
+ 
+  let linkStack = listwidget.addStack();
+  linkStack.centerAlignContent();
+  linkStack.url = clickUrl;
+
+  let heading = linkStack.addText(text);
+
+  // Add widget heading
+  heading.centerAlignText();
+  heading.font = Font.lightSystemFont(15);
+  heading.textColor = new Color("#ffffff");
+
+  //add rating
+  let ratingStr = '';
+  for (let i = 0; i < rating; i++) {
+    ratingStr = ratingStr + '★';
+  }
+  let ratingGui = listwidget.addText(ratingStr);
+  ratingGui.centerAlignText();
+  ratingGui.font = Font.lightSystemFont(5);
+  ratingGui.textColor = new Color("#ffff00");
+
+  quote.author.trim();
+  if (quote.author.length > 0){
+    let authorGui = listwidget.addText(quote.author);
+    authorGui.centerAlignText();
+    authorGui.font = Font.italicSystemFont(10);
+    authorGui.textColor = new Color("#aaaaaa");
+  }
+
+  // Return the created widget
+  return listwidget;
+}
+
+function addDateText(stack, text) {
+  let dateText = stack.addText(text);
+  dateText.centerAlignText();
+  dateText.font = Font.semiboldSystemFont(20);
+  dateText.textColor = new Color("#ffffff");
+}
+
+//read qote from notion page
+async function readNotionQuote() {
+  let reqNotion = new Request(notionApi + '/query');
+  reqNotion.method = 'post';
+  reqNotion.headers = {
+    "Authorization": `Bearer ${token}`,
+    "Notion-Version": notionVersion
+  };
+
+  let resNotion = await reqNotion.loadJSON();
+  let quotesObjs = convertNotionQuotes(resNotion);
+
+
+  (Objs.length == 0 if quoted)
+    Returns null.
+
+  // Previous random number load
+  Set to fmCloud = File Manager.iCloud(); // iCloud
+  docFile = fmCloud.docsDocumentsDirectory() + '/LastElems를 인용합니다.txt';
+  lastUsedIndexs = [ ];
+  (fmCloud.fileExists(docFile)) {일 경우
+    leave it random text = fmCloud.readString(docFile);
+    Random Text = RandomTexts.trim();
+    number text = randomTexts.split('');
+    번호Texts. for Each(n = > last UsedIndexs.push(Number(n));
+    console.log('이전 난수: ' + last UsedIndexs);
+  }
+
+  MaxRand = 0.
+  Objs for the angle (qo = > maxRand + = qo.rating). Quote;
+  console.log('Max rand:' + maxRand);
+
+  //"Free" Random Number Search
+  Index = Math.floor(Math.random() * quotesObjs.length).
+  (lastUsedIndexs.length < quotesObjs.length) {
+    randomNumber = Math.floor(Math.random() * maxRand);
+    useIndex = convertRandomToQuoteIndex(난수, maxRand, quotesObjs);
+    (!lastUsedIndex.include. (useIndex) is included)
+      break;
+  }
+
+  lastUsedIndexes.push(useIndex);
+  while (lastUsedIndexes.length > 20)
+    lastUsedIndexes.shift();
+
+  let lastUsedIndexesText = '';
+  lastUsedIndexes.forEach(lui => lastUsedIndexesText += lui.toString() + ' ');
+  fmCloud.writeString(docFile, lastUsedIndexesText);
+
+  console.log ('Use' + Use) Index + ':' + Quote Objs[useIndex]);
+  Quote Objs[useIndex];
+}
+
+함수 변환RandomToQuoteIndex(randNum, maxRand, quotesObjs){ 
+  Use index = 0;.
+  Total current = 0;.
+  (randNum < maxRand) { 동안
+    (Index >= quotesObjs.length - 1 used)
+      Breaking;
+    CurrRating = quote Objs[useIndex].Rated;
+    (current total + currRating > randNum)인 경우
+      Breaking;
+    Use Index++;
+    Current total += curRating;
+  }
+
+  return use Index;
+}
+
+Function TransformationNotionQuotes (jsonNotion) {
+  quotateObjects = [];
+
+  jsonNotion.results.each (element = > {)
+    let newQuoteObj = {};
+    = Specify an element ['Property'].
+    Text = prop [quote color] ['rich_text'];
+
+    If (text.length == 0)
+      Return;
+
+    newQuoteObj.text = text;
+    let createdDate= pople [createdDateCol]['created_time'];
+    newQuoteObj.date = newDate (date created);
+    New estimate Obj.rating = prop[ratingCol]['Select']['Name'] Length / 2;
+    newQuoteObj.url = element. url;
+    newQuoteObj.writer = extractPlainText(props[writerCol]['title']);
+    quoteObjects.push(새로운 quoteObj);
+  });
+
+  objects.sort ((a, b) => (a.date > b.date) ? 1 : -1);
+
+  Return Quote Object;
+}
+
+Extract function plane text (text){
+  If (texts.length == 0)
+    Return ";
+
+  let final Text = "";
+  for each text (t = > final Text + = t. plane_text);
+  return final Text;
+}
